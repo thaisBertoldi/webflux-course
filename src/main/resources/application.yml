@@ -1,0 +1,4 @@
+spring:
+  data:
+    mongodb:
+      uri: mongodb+srv://thaisbrt:<password>@webfluxcoursecluster.lcpdm5j.mongodb.net/webflux-course?retryWrites=true&w=majority
