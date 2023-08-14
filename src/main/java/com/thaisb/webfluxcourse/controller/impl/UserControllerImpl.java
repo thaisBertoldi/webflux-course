@@ -1,6 +1,7 @@
 package com.thaisb.webfluxcourse.controller.impl;
 
 import com.thaisb.webfluxcourse.controller.UserController;
+import com.thaisb.webfluxcourse.mapper.UserMapper;
 import com.thaisb.webfluxcourse.model.request.UserRequest;
 import com.thaisb.webfluxcourse.model.response.UserResponse;
 import com.thaisb.webfluxcourse.service.UserService;
@@ -18,6 +19,7 @@ import reactor.core.publisher.Mono;
 public class UserControllerImpl implements UserController {
 
     private final UserService service;
+    private final UserMapper mapper;
 
     @Override
     public ResponseEntity<Mono<Void>> save(final UserRequest request) {
@@ -27,7 +29,9 @@ public class UserControllerImpl implements UserController {
 
     @Override
     public ResponseEntity<Mono<UserResponse>> findById(String id) {
-        return null;
+        return ResponseEntity.ok().body(
+            service.findById(id).map(mapper::toResponse)
+        );
     }
 
     @Override
