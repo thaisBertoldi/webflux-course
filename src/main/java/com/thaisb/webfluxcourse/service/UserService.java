@@ -41,4 +41,8 @@ public class UserService {
             .flatMap(repository::save);
     }
 
+    public Mono<User> deleteById(final String id) {
+        return repository.findAndRemove(id);
+    }
+
 }
