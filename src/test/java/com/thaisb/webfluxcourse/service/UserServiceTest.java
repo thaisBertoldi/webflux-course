@@ -18,6 +18,7 @@ import java.util.Objects;
 
 import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.when;
 
 @ExtendWith(MockitoExtension.class)
@@ -44,5 +45,7 @@ class UserServiceTest {
             .expectNextMatches(Objects::nonNull)
             .expectComplete()
             .verify();
+
+        Mockito.verify(repository, times(1)).save(any(User.class));
     }
 }
