@@ -16,6 +16,7 @@ import org.springframework.test.web.reactive.server.WebTestClient;
 import org.springframework.web.reactive.function.BodyInserters;
 import reactor.core.publisher.Mono;
 
+import static org.springframework.http.HttpStatus.BAD_REQUEST;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
@@ -51,5 +52,21 @@ class UserControllerImplTest {
             .expectStatus().isCreated();
 
         verify(userService).save(any(UserRequest.class));
+    }
+
+    @Test
+    void testSaveWithBadRequest() {
+        UserRequest request = new UserRequest(" Teste", "teste@teste.com", "123");
+        webTestClient.post().uri("/users")
+            .contentType(APPLICATION_JSON)
+            .body(BodyInserters.fromValue(request))
+            .exchange()
+            .expectStatus().isBadRequest()
+            .expectBody()
+            .jsonPath("$.status").isEqualTo(BAD_REQUEST.value())
+            .jsonPath("$.error").isEqualTo("Validation error")
+            .jsonPath("$.message").isEqualTo("Error on validation attributes")
+            .jsonPath("$.errors[0].fieldName").isEqualTo("name")
+            .jsonPath("$.errors[0].message").isEqualTo("Campo não pode ter espaços em branco no início ou no final");
     }
 }

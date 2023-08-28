@@ -38,7 +38,7 @@ public class ControllerExceptionHandler {
         WebExchangeBindException ex, ServerHttpRequest request
     ) {
         ValidationError error = new ValidationError(
-            now(), request.getLocalAddress().toString(),
+            now(), request.getPath().toString(),
             BAD_REQUEST.value(), "Validation error", "Error on validation attributes"
         );
 
