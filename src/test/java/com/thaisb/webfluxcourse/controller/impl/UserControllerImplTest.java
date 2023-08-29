@@ -4,6 +4,7 @@ import com.mongodb.reactivestreams.client.MongoClient;
 import com.thaisb.webfluxcourse.entity.User;
 import com.thaisb.webfluxcourse.mapper.UserMapper;
 import com.thaisb.webfluxcourse.model.request.UserRequest;
+import com.thaisb.webfluxcourse.model.response.UserResponse;
 import com.thaisb.webfluxcourse.service.UserService;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -68,5 +69,24 @@ class UserControllerImplTest {
             .jsonPath("$.message").isEqualTo("Error on validation attributes")
             .jsonPath("$.errors[0].fieldName").isEqualTo("name")
             .jsonPath("$.errors[0].message").isEqualTo("Campo não pode ter espaços em branco no início ou no final");
+    }
+
+    @Test
+    void testFindByIdWithSuccess() {
+        final var id = "123";
+        final var userResponse = new UserResponse(id, "Teste", "teste@teste.com", "123");
+
+        when(userService.findById("123")).thenReturn(Mono.just(User.builder().build()));
+        when(userMapper.toResponse(any(User.class))).thenReturn(userResponse);
+
+        webTestClient.get().uri("/users/" + id)
+            .accept(APPLICATION_JSON)
+            .exchange()
+            .expectStatus().isOk()
+            .expectBody()
+            .jsonPath("$.id").isEqualTo(id)
+            .jsonPath("$.name").isEqualTo("Teste")
+            .jsonPath("$.email").isEqualTo("teste@teste.com")
+            .jsonPath("$.password").isEqualTo("123");
     }
 }
