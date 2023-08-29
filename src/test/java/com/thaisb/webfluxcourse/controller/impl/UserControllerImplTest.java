@@ -28,6 +28,10 @@ import static org.springframework.http.MediaType.APPLICATION_JSON;
 @AutoConfigureWebTestClient
 class UserControllerImplTest {
 
+    public static final String ID = "123456";
+    public static final String EMAIL = "teste@teste.com";
+    public static final String NAME = "Teste";
+    public static final String PASSWORD = "123";
     @Autowired
     private WebTestClient webTestClient;
 
@@ -42,7 +46,7 @@ class UserControllerImplTest {
 
     @Test
     void testSaveWithSuccess() {
-        UserRequest request = new UserRequest("Teste", "teste@teste.com", "123");
+        UserRequest request = new UserRequest(NAME, EMAIL, PASSWORD);
 
         when(userService.save(any(UserRequest.class))).thenReturn(Mono.just(User.builder().build()));
 
@@ -57,7 +61,7 @@ class UserControllerImplTest {
 
     @Test
     void testSaveWithBadRequest() {
-        UserRequest request = new UserRequest(" Teste", "teste@teste.com", "123");
+        UserRequest request = new UserRequest(NAME.concat(" "), EMAIL, PASSWORD);
         webTestClient.post().uri("/users")
             .contentType(APPLICATION_JSON)
             .body(BodyInserters.fromValue(request))
@@ -73,20 +77,19 @@ class UserControllerImplTest {
 
     @Test
     void testFindByIdWithSuccess() {
-        final var id = "123";
-        final var userResponse = new UserResponse(id, "Teste", "teste@teste.com", "123");
+        final var userResponse = new UserResponse(ID, NAME, EMAIL, PASSWORD);
 
-        when(userService.findById("123")).thenReturn(Mono.just(User.builder().build()));
+        when(userService.findById(ID)).thenReturn(Mono.just(User.builder().build()));
         when(userMapper.toResponse(any(User.class))).thenReturn(userResponse);
 
-        webTestClient.get().uri("/users/" + id)
+        webTestClient.get().uri("/users/" + ID)
             .accept(APPLICATION_JSON)
             .exchange()
             .expectStatus().isOk()
             .expectBody()
-            .jsonPath("$.id").isEqualTo(id)
-            .jsonPath("$.name").isEqualTo("Teste")
-            .jsonPath("$.email").isEqualTo("teste@teste.com")
-            .jsonPath("$.password").isEqualTo("123");
+            .jsonPath("$.id").isEqualTo(ID)
+            .jsonPath("$.name").isEqualTo(NAME)
+            .jsonPath("$.email").isEqualTo(EMAIL)
+            .jsonPath("$.password").isEqualTo(PASSWORD);
     }
 }
