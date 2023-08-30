@@ -15,6 +15,7 @@ import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.test.context.junit.jupiter.SpringExtension;
 import org.springframework.test.web.reactive.server.WebTestClient;
 import org.springframework.web.reactive.function.BodyInserters;
+import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 
 import static org.springframework.http.HttpStatus.BAD_REQUEST;
@@ -91,5 +92,23 @@ class UserControllerImplTest {
             .jsonPath("$.name").isEqualTo(NAME)
             .jsonPath("$.email").isEqualTo(EMAIL)
             .jsonPath("$.password").isEqualTo(PASSWORD);
+    }
+
+    @Test
+    void testFindAllWithSuccess() {
+        final var userResponse = new UserResponse(ID, NAME, EMAIL, PASSWORD);
+
+        when(userService.findAll()).thenReturn(Flux.just(User.builder().build()));
+        when(userMapper.toResponse(any(User.class))).thenReturn(userResponse);
+
+        webTestClient.get().uri("/users")
+            .accept(APPLICATION_JSON)
+            .exchange()
+            .expectStatus().isOk()
+            .expectBody()
+            .jsonPath("$.[0].id").isEqualTo(ID)
+            .jsonPath("$.[0].name").isEqualTo(NAME)
+            .jsonPath("$.[0].email").isEqualTo(EMAIL)
+            .jsonPath("$.[0].password").isEqualTo(PASSWORD);
     }
 }
