@@ -120,7 +120,7 @@ class UserControllerImplTest {
     }
 
     @Test
-    void testUpdate() {
+    void testUpdateWithSuccess() {
         final var request = new UserRequest(NAME, EMAIL, PASSWORD);
         final var userResponse = new UserResponse(ID, NAME, EMAIL, PASSWORD);
 
@@ -141,5 +141,17 @@ class UserControllerImplTest {
 
         verify(userService).update(anyString(), any(UserRequest.class));
         verify(userMapper).toResponse(any(User.class));
+    }
+
+    @Test
+    void testDeleteWithSuccess() {
+        when(userService.deleteById(anyString()))
+            .thenReturn(Mono.just(User.builder().build()));
+
+        webTestClient.delete().uri("/users/" + ID)
+            .exchange()
+            .expectStatus().isOk();
+
+        verify(userService).deleteById(anyString());
     }
 }
