@@ -6,6 +6,7 @@ import com.thaisb.webfluxcourse.mapper.UserMapper;
 import com.thaisb.webfluxcourse.model.request.UserRequest;
 import com.thaisb.webfluxcourse.model.response.UserResponse;
 import com.thaisb.webfluxcourse.service.UserService;
+import com.thaisb.webfluxcourse.service.exception.ObjectNotFoundException;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -34,6 +35,7 @@ class UserControllerImplTest {
     public static final String EMAIL = "teste@teste.com";
     public static final String NAME = "Teste";
     public static final String PASSWORD = "123";
+    public static final String BASE_URI = "/users";
     @Autowired
     private WebTestClient webTestClient;
 
@@ -52,7 +54,7 @@ class UserControllerImplTest {
 
         when(userService.save(any(UserRequest.class))).thenReturn(Mono.just(User.builder().build()));
 
-        webTestClient.post().uri("/users")
+        webTestClient.post().uri(BASE_URI)
             .contentType(APPLICATION_JSON)
             .body(BodyInserters.fromValue(request))
             .exchange()
@@ -64,7 +66,7 @@ class UserControllerImplTest {
     @Test
     void testSaveWithBadRequest() {
         UserRequest request = new UserRequest(NAME.concat(" "), EMAIL, PASSWORD);
-        webTestClient.post().uri("/users")
+        webTestClient.post().uri(BASE_URI)
             .contentType(APPLICATION_JSON)
             .body(BodyInserters.fromValue(request))
             .exchange()
@@ -84,7 +86,7 @@ class UserControllerImplTest {
         when(userService.findById(ID)).thenReturn(Mono.just(User.builder().build()));
         when(userMapper.toResponse(any(User.class))).thenReturn(userResponse);
 
-        webTestClient.get().uri("/users/" + ID)
+        webTestClient.get().uri(BASE_URI + "/" + ID)
             .accept(APPLICATION_JSON)
             .exchange()
             .expectStatus().isOk()
@@ -105,7 +107,7 @@ class UserControllerImplTest {
         when(userService.findAll()).thenReturn(Flux.just(User.builder().build()));
         when(userMapper.toResponse(any(User.class))).thenReturn(userResponse);
 
-        webTestClient.get().uri("/users")
+        webTestClient.get().uri(BASE_URI)
             .accept(APPLICATION_JSON)
             .exchange()
             .expectStatus().isOk()
@@ -128,7 +130,7 @@ class UserControllerImplTest {
             .thenReturn(Mono.just(User.builder().build()));
         when(userMapper.toResponse(any(User.class))).thenReturn(userResponse);
 
-        webTestClient.patch().uri("/users/" + ID)
+        webTestClient.patch().uri(BASE_URI + "/" + ID)
             .contentType(APPLICATION_JSON)
             .body(BodyInserters.fromValue(request))
             .exchange()
@@ -148,9 +150,21 @@ class UserControllerImplTest {
         when(userService.deleteById(anyString()))
             .thenReturn(Mono.just(User.builder().build()));
 
-        webTestClient.delete().uri("/users/" + ID)
+        webTestClient.delete().uri(BASE_URI + "/" + ID)
             .exchange()
             .expectStatus().isOk();
+
+        verify(userService).deleteById(anyString());
+    }
+
+    @Test
+    void testDeleteWithNotFoundException() {
+        when(userService.deleteById(anyString()))
+            .thenThrow(new ObjectNotFoundException("Id 123456 não encontrado."));
+
+        webTestClient.delete().uri(BASE_URI + "/" + ID)
+            .exchange()
+            .expectStatus().isNotFound();
 
         verify(userService).deleteById(anyString());
     }

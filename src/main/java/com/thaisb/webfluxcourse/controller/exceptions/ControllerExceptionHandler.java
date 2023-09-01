@@ -60,7 +60,7 @@ public class ControllerExceptionHandler {
                     .status(NOT_FOUND.value())
                     .error(NOT_FOUND.getReasonPhrase())
                     .message(ex.getMessage())
-                    .path(request.getLocalAddress().toString())
+                    .path(request.getPath().toString())
                     .build()
             ));
     }
